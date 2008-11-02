@@ -11,6 +11,10 @@
 #include "cue.h"
 #include "toc.h"
 
+#ifdef _MSC_VER
+#define strcasecmp stricmp
+#endif
+
 Cd *cf_parse (char *name, int *format)
 {
 	FILE *fp = NULL;
