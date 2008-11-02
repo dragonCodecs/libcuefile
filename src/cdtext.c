@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "cdtext.h"
+#include <cuetools/cdtext.h>
 
 struct Cdtext {
 	int pti;

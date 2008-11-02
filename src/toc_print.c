@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "cd.h"
+#include <cuetools/cd.h>
 #include "time.h"
 
 void toc_print_track (FILE *fp, Track *track);

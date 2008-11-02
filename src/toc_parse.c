@@ -56,96 +56,106 @@
      NUMBER = 258,
      STRING = 259,
      CATALOG = 260,
-     CDTEXTFILE = 261,
-     FFILE = 262,
-     BINARY = 263,
-     MOTOROLA = 264,
-     AIFF = 265,
-     WAVE = 266,
-     MP3 = 267,
-     TRACK = 268,
-     AUDIO = 269,
-     MODE1_2048 = 270,
-     MODE1_2352 = 271,
-     MODE2_2336 = 272,
-     MODE2_2048 = 273,
-     MODE2_2342 = 274,
-     MODE2_2332 = 275,
-     MODE2_2352 = 276,
-     TRACK_ISRC = 277,
-     FLAGS = 278,
-     PRE = 279,
-     DCP = 280,
-     FOUR_CH = 281,
-     SCMS = 282,
-     PREGAP = 283,
-     INDEX = 284,
-     POSTGAP = 285,
-     TITLE = 286,
-     PERFORMER = 287,
-     SONGWRITER = 288,
-     COMPOSER = 289,
-     ARRANGER = 290,
-     MESSAGE = 291,
-     DISC_ID = 292,
-     GENRE = 293,
-     TOC_INFO1 = 294,
-     TOC_INFO2 = 295,
-     UPC_EAN = 296,
-     ISRC = 297,
-     SIZE_INFO = 298
+     CD_DA = 261,
+     CD_ROM = 262,
+     CD_ROM_XA = 263,
+     TRACK = 264,
+     AUDIO = 265,
+     MODE1 = 266,
+     MODE1_RAW = 267,
+     MODE2 = 268,
+     MODE2_FORM1 = 269,
+     MODE2_FORM2 = 270,
+     MODE2_FORM_MIX = 271,
+     MODE2_RAW = 272,
+     RW = 273,
+     RW_RAW = 274,
+     NO = 275,
+     COPY = 276,
+     PRE_EMPHASIS = 277,
+     TWO_CHANNEL_AUDIO = 278,
+     FOUR_CHANNEL_AUDIO = 279,
+     ISRC = 280,
+     SILENCE = 281,
+     ZERO = 282,
+     AUDIOFILE = 283,
+     DATAFILE = 284,
+     FIFO = 285,
+     START = 286,
+     PREGAP = 287,
+     INDEX = 288,
+     CD_TEXT = 289,
+     LANGUAGE_MAP = 290,
+     LANGUAGE = 291,
+     TITLE = 292,
+     PERFORMER = 293,
+     SONGWRITER = 294,
+     COMPOSER = 295,
+     ARRANGER = 296,
+     MESSAGE = 297,
+     DISC_ID = 298,
+     GENRE = 299,
+     TOC_INFO1 = 300,
+     TOC_INFO2 = 301,
+     UPC_EAN = 302,
+     SIZE_INFO = 303
    };
 #endif
 #define NUMBER 258
 #define STRING 259
 #define CATALOG 260
-#define CDTEXTFILE 261
-#define FFILE 262
-#define BINARY 263
-#define MOTOROLA 264
-#define AIFF 265
-#define WAVE 266
-#define MP3 267
-#define TRACK 268
-#define AUDIO 269
-#define MODE1_2048 270
-#define MODE1_2352 271
-#define MODE2_2336 272
-#define MODE2_2048 273
-#define MODE2_2342 274
-#define MODE2_2332 275
-#define MODE2_2352 276
-#define TRACK_ISRC 277
-#define FLAGS 278
-#define PRE 279
-#define DCP 280
-#define FOUR_CH 281
-#define SCMS 282
-#define PREGAP 283
-#define INDEX 284
-#define POSTGAP 285
-#define TITLE 286
-#define PERFORMER 287
-#define SONGWRITER 288
-#define COMPOSER 289
-#define ARRANGER 290
-#define MESSAGE 291
-#define DISC_ID 292
-#define GENRE 293
-#define TOC_INFO1 294
-#define TOC_INFO2 295
-#define UPC_EAN 296
-#define ISRC 297
-#define SIZE_INFO 298
+#define CD_DA 261
+#define CD_ROM 262
+#define CD_ROM_XA 263
+#define TRACK 264
+#define AUDIO 265
+#define MODE1 266
+#define MODE1_RAW 267
+#define MODE2 268
+#define MODE2_FORM1 269
+#define MODE2_FORM2 270
+#define MODE2_FORM_MIX 271
+#define MODE2_RAW 272
+#define RW 273
+#define RW_RAW 274
+#define NO 275
+#define COPY 276
+#define PRE_EMPHASIS 277
+#define TWO_CHANNEL_AUDIO 278
+#define FOUR_CHANNEL_AUDIO 279
+#define ISRC 280
+#define SILENCE 281
+#define ZERO 282
+#define AUDIOFILE 283
+#define DATAFILE 284
+#define FIFO 285
+#define START 286
+#define PREGAP 287
+#define INDEX 288
+#define CD_TEXT 289
+#define LANGUAGE_MAP 290
+#define LANGUAGE 291
+#define TITLE 292
+#define PERFORMER 293
+#define SONGWRITER 294
+#define COMPOSER 295
+#define ARRANGER 296
+#define MESSAGE 297
+#define DISC_ID 298
+#define GENRE 299
+#define TOC_INFO1 300
+#define TOC_INFO2 301
+#define UPC_EAN 302
+#define SIZE_INFO 303
 
 
 
 
 /* Copy the first part of user declarations.  */
-#line 1 "cue_parse.y"
+#line 1 "toc_parse.y"
 
 /*
- * cue_parse.y -- parser for cue files
+ * toc_parse.y -- parser for toc files
  *
  * Copyright (C) 2004, 2005, 2006 Svend Sorensen
  * For license terms, see the file COPYING in this distribution.
@@ -154,9 +164,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "cd.h"
+#include <cuetools/cd.h>
 #include "time.h"
-#include "cue_parse_prefix.h"
+#include "toc_parse_prefix.h"
 
 #define YYDEBUG 1
 
@@ -165,11 +175,7 @@ void yyerror (char *s);
 
 static Cd *cd = NULL;
 static Track *track = NULL;
-static Track *prev_track = NULL;
 static Cdtext *cdtext = NULL;
-static char *prev_filename = NULL;	/* last file in or before last track */
-static char *cur_filename = NULL;	/* last file in the last track */
-static char *new_filename = NULL;	/* last file in this track */
 
 
 /* Enabling traces.  */
@@ -186,13 +192,13 @@ static char *new_filename = NULL;	/* last file in this track */
 #endif
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 32 "cue_parse.y"
+#line 28 "toc_parse.y"
 typedef union YYSTYPE {
 	long ival;
 	char *sval;
 } YYSTYPE;
 /* Line 191 of yacc.c.  */
-#line 195 "cue_parse.c"
+#line 201 "toc_parse.c"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
@@ -204,7 +210,7 @@ typedef union YYSTYPE {
 
 
 /* Line 214 of yacc.c.  */
-#line 207 "cue_parse.c"
+#line 213 "toc_parse.c"
 
 #if ! defined (yyoverflow) || YYERROR_VERBOSE
 
@@ -303,20 +309,20 @@ union yyalloc
 /* YYFINAL -- State number of the termination state. */
 #define YYFINAL  3
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   120
+#define YYLAST   149
 
 /* YYNTOKENS -- Number of terminals. */
-#define YYNTOKENS  46
+#define YYNTOKENS  54
 /* YYNNTS -- Number of nonterminals. */
-#define YYNNTS  19
+#define YYNNTS  33
 /* YYNRULES -- Number of rules. */
-#define YYNRULES  61
+#define YYNRULES  88
 /* YYNRULES -- Number of states. */
-#define YYNSTATES  91
+#define YYNSTATES  156
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   298
+#define YYMAXUTOK   303
 
 #define YYTRANSLATE(YYX) 						\
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -325,18 +331,18 @@ union yyalloc
 static const unsigned char yytranslate[] =
 {
        0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-      44,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+      49,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,    53,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,    52,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,    45,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,    50,     2,    51,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -353,54 +359,69 @@ static const unsigned char yytranslate[] =
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
       25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
-      35,    36,    37,    38,    39,    40,    41,    42,    43
+      35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
+      45,    46,    47,    48
 };
 
 #if YYDEBUG
 /* YYPRHS[YYN] -- Index of the first RHS symbol of rule number YYN in
    YYRHS.  */
-static const unsigned char yyprhs[] =
+static const unsigned short yyprhs[] =
 {
-       0,     0,     3,     7,     8,     9,    12,    16,    20,    22,
-      24,    27,    32,    34,    37,    41,    43,    45,    47,    49,
-      51,    52,    57,    59,    61,    63,    65,    67,    69,    71,
-      73,    75,    78,    80,    84,    88,    92,    97,   101,   103,
-     106,   107,   110,   112,   114,   116,   118,   122,   124,   126,
-     128,   130,   132,   134,   136,   138,   140,   142,   144,   146,
-     148,   150
+       0,     0,     3,     7,     8,     9,    12,    16,    19,    27,
+      30,    32,    34,    36,    38,    41,    45,    46,    50,    52,
+      55,    57,    59,    61,    63,    65,    67,    69,    71,    73,
+      75,    77,    80,    82,    86,    93,    95,    97,    99,   102,
+     104,   106,   109,   112,   115,   119,   123,   126,   130,   135,
+     141,   145,   150,   155,   157,   159,   162,   166,   170,   174,
+     181,   183,   186,   191,   193,   196,   204,   205,   208,   212,
+     218,   220,   222,   224,   226,   228,   230,   232,   234,   236,
+     238,   240,   242,   244,   245,   249,   251,   257,   258
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS. */
 static const yysigned_char yyrhs[] =
 {
-      47,     0,    -1,    48,    49,    52,    -1,    -1,    -1,    49,
-      50,    -1,     5,     4,    44,    -1,     6,     4,    44,    -1,
-      62,    -1,    51,    -1,     1,    44,    -1,     7,     4,    54,
-      44,    -1,    53,    -1,    52,    53,    -1,    55,    56,    58,
-      -1,     8,    -1,     9,    -1,    10,    -1,    11,    -1,    12,
-      -1,    -1,    13,     3,    57,    44,    -1,    14,    -1,    15,
-      -1,    16,    -1,    17,    -1,    18,    -1,    19,    -1,    20,
-      -1,    21,    -1,    59,    -1,    58,    59,    -1,    62,    -1,
-      23,    60,    44,    -1,    22,     4,    44,    -1,    28,    64,
-      44,    -1,    29,     3,    64,    44,    -1,    30,    64,    44,
-      -1,    51,    -1,     1,    44,    -1,    -1,    60,    61,    -1,
-      24,    -1,    25,    -1,    26,    -1,    27,    -1,    63,     4,
-      44,    -1,    31,    -1,    32,    -1,    33,    -1,    34,    -1,
-      35,    -1,    36,    -1,    37,    -1,    38,    -1,    39,    -1,
-      40,    -1,    41,    -1,    42,    -1,    43,    -1,     3,    -1,
-       3,    45,     3,    45,     3,    -1
+      55,     0,    -1,    56,    57,    60,    -1,    -1,    -1,    57,
+      58,    -1,     5,     4,    49,    -1,    59,    49,    -1,    34,
+      50,    86,    76,    79,    51,    49,    -1,     1,    49,    -1,
+       6,    -1,     7,    -1,     8,    -1,    61,    -1,    60,    61,
+      -1,    62,    63,    67,    -1,    -1,     9,    64,    49,    -1,
+      65,    -1,    65,    66,    -1,    10,    -1,    11,    -1,    12,
+      -1,    13,    -1,    14,    -1,    15,    -1,    16,    -1,    17,
+      -1,    18,    -1,    19,    -1,    68,    -1,    67,    68,    -1,
+      69,    -1,    25,     4,    49,    -1,    34,    50,    86,    79,
+      51,    49,    -1,    72,    -1,    74,    -1,    75,    -1,     1,
+      49,    -1,    70,    -1,    71,    -1,    21,    49,    -1,    22,
+      49,    -1,    24,    49,    -1,    20,    22,    49,    -1,    20,
+      21,    49,    -1,    23,    49,    -1,    73,    85,    49,    -1,
+      28,     4,    85,    49,    -1,    28,     4,    85,    85,    49,
+      -1,    29,     4,    49,    -1,    29,     4,    85,    49,    -1,
+      30,     4,    85,    49,    -1,    26,    -1,    27,    -1,    31,
+      49,    -1,    31,    85,    49,    -1,    32,    85,    49,    -1,
+      33,    85,    49,    -1,    35,    50,    86,    77,    51,    49,
+      -1,    78,    -1,    77,    78,    -1,     3,    52,     3,    86,
+      -1,    80,    -1,    79,    80,    -1,    36,     3,    50,    86,
+      81,    51,    49,    -1,    -1,    81,    82,    -1,    83,     4,
+      49,    -1,    83,    50,    84,    51,    49,    -1,    37,    -1,
+      38,    -1,    39,    -1,    40,    -1,    41,    -1,    42,    -1,
+      43,    -1,    44,    -1,    45,    -1,    46,    -1,    47,    -1,
+      25,    -1,    48,    -1,    -1,    84,    53,     3,    -1,     3,
+      -1,     3,    52,     3,    52,     3,    -1,    -1,    49,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned short yyrline[] =
 {
-       0,    99,    99,   103,   109,   111,   115,   116,   117,   118,
-     119,   123,   133,   134,   138,   142,   143,   144,   145,   146,
-     150,   171,   177,   178,   179,   180,   181,   182,   183,   184,
-     188,   189,   193,   194,   195,   196,   197,   217,   218,   219,
-     222,   224,   228,   229,   230,   231,   235,   239,   240,   241,
-     242,   243,   244,   245,   246,   247,   248,   249,   250,   251,
-     255,   256
+       0,   103,   103,   107,   113,   115,   119,   120,   121,   122,
+     126,   127,   128,   132,   133,   137,   144,   153,   157,   158,
+     162,   163,   164,   165,   166,   167,   168,   169,   173,   174,
+     178,   179,   183,   184,   185,   186,   187,   188,   189,   193,
+     194,   198,   199,   200,   204,   205,   206,   210,   216,   220,
+     225,   228,   232,   239,   240,   244,   245,   248,   255,   259,
+     263,   264,   268,   272,   273,   277,   280,   282,   286,   289,
+     295,   296,   297,   298,   299,   300,   301,   302,   303,   304,
+     305,   306,   307,   310,   312,   316,   317,   320,   322
 };
 #endif
 
@@ -409,18 +430,23 @@ static const unsigned short yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals. */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "NUMBER", "STRING", "CATALOG", 
-  "CDTEXTFILE", "FFILE", "BINARY", "MOTOROLA", "AIFF", "WAVE", "MP3", 
-  "TRACK", "AUDIO", "MODE1_2048", "MODE1_2352", "MODE2_2336", 
-  "MODE2_2048", "MODE2_2342", "MODE2_2332", "MODE2_2352", "TRACK_ISRC", 
-  "FLAGS", "PRE", "DCP", "FOUR_CH", "SCMS", "PREGAP", "INDEX", "POSTGAP", 
-  "TITLE", "PERFORMER", "SONGWRITER", "COMPOSER", "ARRANGER", "MESSAGE", 
-  "DISC_ID", "GENRE", "TOC_INFO1", "TOC_INFO2", "UPC_EAN", "ISRC", 
-  "SIZE_INFO", "'\\n'", "':'", "$accept", "cuefile", "new_cd", 
-  "global_statements", "global_statement", "track_data", "track_list", 
-  "track", "file_format", "new_track", "track_def", "track_mode", 
-  "track_statements", "track_statement", "track_flags", "track_flag", 
-  "cdtext", "cdtext_item", "time", 0
+  "$end", "error", "$undefined", "NUMBER", "STRING", "CATALOG", "CD_DA", 
+  "CD_ROM", "CD_ROM_XA", "TRACK", "AUDIO", "MODE1", "MODE1_RAW", "MODE2", 
+  "MODE2_FORM1", "MODE2_FORM2", "MODE2_FORM_MIX", "MODE2_RAW", "RW", 
+  "RW_RAW", "NO", "COPY", "PRE_EMPHASIS", "TWO_CHANNEL_AUDIO", 
+  "FOUR_CHANNEL_AUDIO", "ISRC", "SILENCE", "ZERO", "AUDIOFILE", 
+  "DATAFILE", "FIFO", "START", "PREGAP", "INDEX", "CD_TEXT", 
+  "LANGUAGE_MAP", "LANGUAGE", "TITLE", "PERFORMER", "SONGWRITER", 
+  "COMPOSER", "ARRANGER", "MESSAGE", "DISC_ID", "GENRE", "TOC_INFO1", 
+  "TOC_INFO2", "UPC_EAN", "SIZE_INFO", "'\\n'", "'{'", "'}'", "':'", 
+  "','", "$accept", "tocfile", "new_cd", "global_statements", 
+  "global_statement", "disc_mode", "track_list", "track", "new_track", 
+  "track_def", "track_modes", "track_mode", "track_sub_mode", 
+  "track_statements", "track_statement", "track_flags", "track_set_flag", 
+  "track_clear_flag", "track_data", "zero_data", "track_pregap", 
+  "track_index", "language_map", "languages", "language", "cdtext_langs", 
+  "cdtext_lang", "cdtext_defs", "cdtext_def", "cdtext_item", "bytes", 
+  "time", "opt_nl", 0
 };
 #endif
 
@@ -433,32 +459,37 @@ static const unsigned short yytoknum[] =
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
      275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
      285,   286,   287,   288,   289,   290,   291,   292,   293,   294,
-     295,   296,   297,   298,    10,    58
+     295,   296,   297,   298,   299,   300,   301,   302,   303,    10,
+     123,   125,    58,    44
 };
 # endif
 
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const unsigned char yyr1[] =
 {
-       0,    46,    47,    48,    49,    49,    50,    50,    50,    50,
-      50,    51,    52,    52,    53,    54,    54,    54,    54,    54,
-      55,    56,    57,    57,    57,    57,    57,    57,    57,    57,
-      58,    58,    59,    59,    59,    59,    59,    59,    59,    59,
-      60,    60,    61,    61,    61,    61,    62,    63,    63,    63,
-      63,    63,    63,    63,    63,    63,    63,    63,    63,    63,
-      64,    64
+       0,    54,    55,    56,    57,    57,    58,    58,    58,    58,
+      59,    59,    59,    60,    60,    61,    62,    63,    64,    64,
+      65,    65,    65,    65,    65,    65,    65,    65,    66,    66,
+      67,    67,    68,    68,    68,    68,    68,    68,    68,    69,
+      69,    70,    70,    70,    71,    71,    71,    72,    72,    72,
+      72,    72,    72,    73,    73,    74,    74,    74,    75,    76,
+      77,    77,    78,    79,    79,    80,    81,    81,    82,    82,
+      83,    83,    83,    83,    83,    83,    83,    83,    83,    83,
+      83,    83,    83,    84,    84,    85,    85,    86,    86
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const unsigned char yyr2[] =
 {
-       0,     2,     3,     0,     0,     2,     3,     3,     1,     1,
-       2,     4,     1,     2,     3,     1,     1,     1,     1,     1,
-       0,     4,     1,     1,     1,     1,     1,     1,     1,     1,
-       1,     2,     1,     3,     3,     3,     4,     3,     1,     2,
-       0,     2,     1,     1,     1,     1,     3,     1,     1,     1,
+       0,     2,     3,     0,     0,     2,     3,     2,     7,     2,
+       1,     1,     1,     1,     2,     3,     0,     3,     1,     2,
        1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
-       1,     5
+       1,     2,     1,     3,     6,     1,     1,     1,     2,     1,
+       1,     2,     2,     2,     3,     3,     2,     3,     4,     5,
+       3,     4,     4,     1,     1,     2,     3,     3,     3,     6,
+       1,     2,     4,     1,     2,     7,     0,     2,     3,     5,
+       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
+       1,     1,     1,     0,     3,     1,     5,     0,     1
 };
 
 /* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
@@ -466,102 +497,128 @@ static const unsigned char yyr2[] =
    means the default is an error.  */
 static const unsigned char yydefact[] =
 {
-       3,     0,     4,     1,     0,     0,     0,     0,     0,    47,
-      48,    49,    50,    51,    52,    53,    54,    55,    56,    57,
-      58,    59,     5,     9,     2,    12,     0,     8,     0,    10,
-       0,     0,     0,    13,     0,     0,     0,     6,     7,    15,
-      16,    17,    18,    19,     0,     0,     0,     0,    40,     0,
-       0,     0,    38,     0,    30,    32,    46,    11,    22,    23,
-      24,    25,    26,    27,    28,    29,     0,    39,     0,     0,
-      60,     0,     0,     0,    31,    21,    34,    42,    43,    44,
-      45,    33,    41,     0,    35,     0,    37,     0,    36,     0,
-      61
+       3,     0,     4,     1,     0,     0,     0,    10,    11,    12,
+       0,     5,     0,     2,    13,     0,     9,     0,    87,     7,
+      14,     0,     0,     6,    88,     0,    20,    21,    22,    23,
+      24,    25,    26,    27,     0,    18,     0,     0,     0,     0,
+       0,     0,     0,    53,    54,     0,     0,     0,     0,     0,
+       0,     0,     0,    30,    32,    39,    40,    35,     0,    36,
+      37,     0,     0,    17,    28,    29,    19,    38,     0,     0,
+      41,    42,    46,    43,     0,     0,     0,     0,    85,    55,
+       0,     0,     0,    87,    31,     0,    87,     0,     0,    63,
+      45,    44,    33,     0,    50,     0,     0,     0,    56,    57,
+      58,     0,    47,     0,     0,     0,    64,    48,     0,    51,
+      52,     0,     0,     0,     0,    60,    87,     8,    49,     0,
+       0,     0,     0,    61,    66,    86,    34,    87,    59,     0,
+      62,    81,    70,    71,    72,    73,    74,    75,    76,    77,
+      78,    79,    80,    82,     0,    67,     0,    65,     0,    83,
+      68,     0,     0,     0,    69,    84
 };
 
 /* YYDEFGOTO[NTERM-NUM]. */
-static const yysigned_char yydefgoto[] =
+static const short yydefgoto[] =
 {
-      -1,     1,     2,     4,    22,    52,    24,    25,    44,    26,
-      35,    66,    53,    54,    69,    82,    55,    28,    71
+      -1,     1,     2,     4,    11,    12,    13,    14,    15,    22,
+      34,    35,    66,    52,    53,    54,    55,    56,    57,    58,
+      59,    60,    62,   114,   115,    88,    89,   129,   145,   146,
+     151,    80,    25
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-#define YYPACT_NINF -49
-static const yysigned_char yypact[] =
+#define YYPACT_NINF -87
+static const short yypact[] =
 {
-     -49,     2,   -49,   -49,    56,   -40,     1,     4,     5,   -49,
-     -49,   -49,   -49,   -49,   -49,   -49,   -49,   -49,   -49,   -49,
-     -49,   -49,   -49,   -49,    -7,   -49,    -3,   -49,     7,   -49,
-     -32,   -25,     6,   -49,    17,    43,   -23,   -49,   -49,   -49,
-     -49,   -49,   -49,   -49,   -19,    90,   -18,    23,   -49,    42,
-      44,    42,   -49,     0,   -49,   -49,   -49,   -49,   -49,   -49,
-     -49,   -49,   -49,   -49,   -49,   -49,     8,   -49,     9,    76,
-       3,    10,    42,    11,   -49,   -49,   -49,   -49,   -49,   -49,
-     -49,   -49,   -49,    46,   -49,    12,   -49,    13,   -49,    48,
-     -49
+     -87,     5,   -87,   -87,    12,   -38,    11,   -87,   -87,   -87,
+     -27,   -87,   -19,    29,   -87,    30,   -87,    -9,    -8,   -87,
+     -87,    79,    53,   -87,   -87,     8,   -87,   -87,   -87,   -87,
+     -87,   -87,   -87,   -87,    -5,     9,     6,    10,    22,    23,
+      48,    49,    95,   -87,   -87,   108,   109,   111,    -2,   113,
+     113,    67,    36,   -87,   -87,   -87,   -87,   -87,   113,   -87,
+     -87,    68,    83,   -87,   -87,   -87,   -87,   -87,    71,    72,
+     -87,   -87,   -87,   -87,    73,   113,     0,   113,    74,   -87,
+      75,    76,    78,    -8,   -87,    80,    -8,   120,   -26,   -87,
+     -87,   -87,   -87,     1,   -87,    81,    82,   125,   -87,   -87,
+     -87,    83,   -87,   129,    84,    86,   -87,   -87,    87,   -87,
+     -87,    85,   -22,    88,    -3,   -87,    -8,   -87,   -87,   130,
+      89,   136,    92,   -87,   -87,   -87,   -87,    -8,   -87,    63,
+     -87,   -87,   -87,   -87,   -87,   -87,   -87,   -87,   -87,   -87,
+     -87,   -87,   -87,   -87,    93,   -87,     2,   -87,    94,   -87,
+     -87,   -29,    96,   141,   -87,   -87
 };
 
 /* YYPGOTO[NTERM-NUM].  */
-static const yysigned_char yypgoto[] =
+static const short yypgoto[] =
 {
-     -49,   -49,   -49,   -49,   -49,    55,   -49,    22,   -49,   -49,
-     -49,   -49,   -49,    14,   -49,   -49,    60,   -49,   -48
+     -87,   -87,   -87,   -87,   -87,   -87,   -87,   133,   -87,   -87,
+     -87,   -87,   -87,   -87,    97,   -87,   -87,   -87,   -87,   -87,
+     -87,   -87,   -87,   -87,    33,    47,   -86,   -87,   -87,   -87,
+     -87,   -42,   -74
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
    positive, shift that token.  If negative, reduce the rule which
    number is the opposite.  If zero, do what YYDEFACT says.
    If YYTABLE_NINF, syntax error.  */
-#define YYTABLE_NINF -21
-static const yysigned_char yytable[] =
+#define YYTABLE_NINF -17
+static const short yytable[] =
 {
-     -14,    46,     3,    73,    29,    30,   -20,     8,    31,    32,
-      34,    36,    37,   -14,    39,    40,    41,    42,    43,    38,
-      45,    56,    47,    48,    85,    57,    67,    68,    49,    50,
-      51,     9,    10,    11,    12,    13,    14,    15,    16,    17,
-      18,    19,    20,    21,    46,    70,    33,    72,    83,    87,
-       8,    90,    75,    76,    84,    86,    88,     5,    89,    23,
-       0,     6,     7,     8,    27,    47,    48,    74,     0,   -20,
-       0,    49,    50,    51,     9,    10,    11,    12,    13,    14,
-      15,    16,    17,    18,    19,    20,    21,     9,    10,    11,
-      12,    13,    14,    15,    16,    17,    18,    19,    20,    21,
-      77,    78,    79,    80,    58,    59,    60,    61,    62,    63,
-      64,    65,     0,     0,     0,     0,     0,     0,     0,     0,
-      81
+     113,    78,   106,    78,    78,     3,   148,    81,    82,   101,
+      87,    16,   103,     5,    87,    17,    85,     6,     7,     8,
+       9,   -16,   152,    18,   153,   105,   106,    64,    65,   120,
+      19,    68,    69,    93,    95,    96,   -15,    36,   -16,    21,
+      23,    24,   124,    61,    63,   -15,    10,    79,   122,    94,
+     107,   108,   149,   130,    36,    67,    37,    38,    39,    40,
+      41,    42,    43,    44,    45,    46,    47,    48,    49,    50,
+      51,    70,    71,    37,    38,    39,    40,    41,    42,    43,
+      44,    45,    46,    47,    48,    49,    50,    51,   131,    26,
+      27,    28,    29,    30,    31,    32,    33,    72,    73,    74,
+     132,   133,   134,   135,   136,   137,   138,   139,   140,   141,
+     142,   143,    75,    76,   144,    77,    78,    83,    86,    87,
+      90,    91,    92,   104,    98,    99,    97,   100,   111,   102,
+     109,   110,   113,   125,   116,   117,   118,   119,   126,   127,
+     121,   128,   147,   150,   155,   154,    20,   123,   112,    84
 };
 
-static const yysigned_char yycheck[] =
+static const unsigned char yycheck[] =
 {
-       0,     1,     0,    51,    44,     4,    13,     7,     4,     4,
-      13,     4,    44,    13,     8,     9,    10,    11,    12,    44,
-       3,    44,    22,    23,    72,    44,    44,     4,    28,    29,
-      30,    31,    32,    33,    34,    35,    36,    37,    38,    39,
-      40,    41,    42,    43,     1,     3,    24,     3,    45,     3,
-       7,     3,    44,    44,    44,    44,    44,     1,    45,     4,
-      -1,     5,     6,     7,     4,    22,    23,    53,    -1,    13,
-      -1,    28,    29,    30,    31,    32,    33,    34,    35,    36,
-      37,    38,    39,    40,    41,    42,    43,    31,    32,    33,
-      34,    35,    36,    37,    38,    39,    40,    41,    42,    43,
-      24,    25,    26,    27,    14,    15,    16,    17,    18,    19,
-      20,    21,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-      44
+       3,     3,    88,     3,     3,     0,     4,    49,    50,    83,
+      36,    49,    86,     1,    36,     4,    58,     5,     6,     7,
+       8,     9,    51,    50,    53,    51,   112,    18,    19,    51,
+      49,    21,    22,    75,    76,    77,     0,     1,     9,     9,
+      49,    49,   116,    35,    49,     9,    34,    49,    51,    49,
+      49,    93,    50,   127,     1,    49,    20,    21,    22,    23,
+      24,    25,    26,    27,    28,    29,    30,    31,    32,    33,
+      34,    49,    49,    20,    21,    22,    23,    24,    25,    26,
+      27,    28,    29,    30,    31,    32,    33,    34,    25,    10,
+      11,    12,    13,    14,    15,    16,    17,    49,    49,     4,
+      37,    38,    39,    40,    41,    42,    43,    44,    45,    46,
+      47,    48,     4,     4,    51,     4,     3,    50,    50,    36,
+      49,    49,    49,     3,    49,    49,    52,    49,     3,    49,
+      49,    49,     3,     3,    50,    49,    49,    52,    49,     3,
+      52,    49,    49,    49,     3,    49,    13,   114,   101,    52
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
    symbol of state STATE-NUM.  */
 static const unsigned char yystos[] =
 {
-       0,    47,    48,     0,    49,     1,     5,     6,     7,    31,
-      32,    33,    34,    35,    36,    37,    38,    39,    40,    41,
-      42,    43,    50,    51,    52,    53,    55,    62,    63,    44,
-       4,     4,     4,    53,    13,    56,     4,    44,    44,     8,
-       9,    10,    11,    12,    54,     3,     1,    22,    23,    28,
-      29,    30,    51,    58,    59,    62,    44,    44,    14,    15,
-      16,    17,    18,    19,    20,    21,    57,    44,     4,    60,
-       3,    64,     3,    64,    59,    44,    44,    24,    25,    26,
-      27,    44,    61,    45,    44,    64,    44,     3,    44,    45,
-       3
+       0,    55,    56,     0,    57,     1,     5,     6,     7,     8,
+      34,    58,    59,    60,    61,    62,    49,     4,    50,    49,
+      61,     9,    63,    49,    49,    86,    10,    11,    12,    13,
+      14,    15,    16,    17,    64,    65,     1,    20,    21,    22,
+      23,    24,    25,    26,    27,    28,    29,    30,    31,    32,
+      33,    34,    67,    68,    69,    70,    71,    72,    73,    74,
+      75,    35,    76,    49,    18,    19,    66,    49,    21,    22,
+      49,    49,    49,    49,     4,     4,     4,     4,     3,    49,
+      85,    85,    85,    50,    68,    85,    50,    36,    79,    80,
+      49,    49,    49,    85,    49,    85,    85,    52,    49,    49,
+      49,    86,    49,    86,     3,    51,    80,    49,    85,    49,
+      49,     3,    79,     3,    77,    78,    50,    49,    49,    52,
+      51,    52,    51,    78,    86,     3,    49,     3,    49,    81,
+      86,    25,    37,    38,    39,    40,    41,    42,    43,    44,
+      45,    46,    47,    48,    51,    82,    83,    49,     4,    50,
+      49,    84,    51,    53,    49,     3
 };
 
 #if ! defined (YYSIZE_T) && defined (__SIZE_TYPE__)
@@ -1171,7 +1228,7 @@ yyreduce:
   switch (yyn)
     {
         case 3:
-#line 103 "cue_parse.y"
+#line 107 "toc_parse.y"
     {
 		cd = cd_init();
 		cdtext = cd_get_cdtext(cd);
@@ -1179,106 +1236,159 @@ yyreduce:
     break;
 
   case 6:
-#line 115 "cue_parse.y"
+#line 119 "toc_parse.y"
     { cd_set_catalog(cd, yyvsp[-1].sval); }
     break;
 
   case 7:
-#line 116 "cue_parse.y"
-    { /* ignored */ }
+#line 120 "toc_parse.y"
+    { cd_set_mode(cd, yyvsp[-1].ival); }
     break;
 
-  case 11:
-#line 123 "cue_parse.y"
+  case 15:
+#line 137 "toc_parse.y"
     {
-		if (NULL != new_filename) {
-			yyerror("too many files specified\n");
-			free(new_filename);
-		}
-		new_filename = strdup(yyvsp[-2].sval);
+		while (2 > track_get_nindex(track))
+			track_add_index(track, 0);
 	}
     break;
 
-  case 20:
-#line 150 "cue_parse.y"
+  case 16:
+#line 144 "toc_parse.y"
     {
-		/* save previous track, to later set length */
-		prev_track = track;
-
 		track = cd_add_track(cd);
 		cdtext = track_get_cdtext(track);
-
-		cur_filename = new_filename;
-		if (NULL != cur_filename)
-			prev_filename = cur_filename;
-
-		if (NULL == prev_filename)
-			yyerror("no file specified for track");
-		else
-			track_set_filename(track, prev_filename);
-
-		new_filename = NULL;
+		/* add 0 index */
+		track_add_index(track, 0);
 	}
     break;
 
-  case 21:
-#line 171 "cue_parse.y"
-    {
-		track_set_mode(track, yyvsp[-1].ival);
-	}
+  case 17:
+#line 153 "toc_parse.y"
+    { track_set_mode(track, yyvsp[-1].ival); }
     break;
 
-  case 34:
-#line 195 "cue_parse.y"
+  case 19:
+#line 158 "toc_parse.y"
+    { track_set_sub_mode(track, yyvsp[0].ival); }
+    break;
+
+  case 33:
+#line 184 "toc_parse.y"
     { track_set_isrc(track, yyvsp[-1].sval); }
     break;
 
-  case 35:
-#line 196 "cue_parse.y"
-    { track_set_zero_pre(track, yyvsp[-1].ival); }
-    break;
-
-  case 36:
-#line 197 "cue_parse.y"
-    {
-		int i = track_get_nindex(track);
-		long prev_length;
-
-		if (0 == i) {
-			/* first index */
-			track_set_start(track, yyvsp[-1].ival);
-
-			if (NULL != prev_track && NULL == cur_filename) {
-				/* track shares file with previous track */
-				prev_length = yyvsp[-1].ival - track_get_start(prev_track);
-				track_set_length(prev_track, prev_length);
-			}
-		}
-
-		for (; i <= yyvsp[-2].ival; i++)
-			track_add_index(track, \
-			track_get_zero_pre(track) + yyvsp[-1].ival \
-			- track_get_start(track));
-	}
-    break;
-
-  case 37:
-#line 217 "cue_parse.y"
-    { track_set_zero_post(track, yyvsp[-1].ival); }
-    break;
-
-  case 41:
-#line 224 "cue_parse.y"
+  case 39:
+#line 193 "toc_parse.y"
     { track_set_flag(track, yyvsp[0].ival); }
     break;
 
-  case 46:
-#line 235 "cue_parse.y"
-    { cdtext_set (yyvsp[-2].ival, yyvsp[-1].sval, cdtext); }
+  case 40:
+#line 194 "toc_parse.y"
+    { track_clear_flag(track, yyvsp[0].ival); }
     break;
 
-  case 61:
-#line 256 "cue_parse.y"
+  case 44:
+#line 204 "toc_parse.y"
+    { yyval.ival = yyvsp[-1].ival; }
+    break;
+
+  case 45:
+#line 205 "toc_parse.y"
+    { yyval.ival = yyvsp[-1].ival; }
+    break;
+
+  case 47:
+#line 210 "toc_parse.y"
+    {
+		if (NULL == track_get_filename(track))
+			track_set_zero_pre(track, yyvsp[-1].ival);
+		else
+			track_set_zero_post(track, yyvsp[-1].ival);
+	}
+    break;
+
+  case 48:
+#line 216 "toc_parse.y"
+    {
+		track_set_filename(track, yyvsp[-2].sval);
+		track_set_start(track, yyvsp[-1].ival);
+	}
+    break;
+
+  case 49:
+#line 220 "toc_parse.y"
+    {
+		track_set_filename(track, yyvsp[-3].sval);
+		track_set_start(track, yyvsp[-2].ival);
+		track_set_length(track, yyvsp[-1].ival);
+	}
+    break;
+
+  case 50:
+#line 225 "toc_parse.y"
+    {
+		track_set_filename(track, yyvsp[-1].sval);
+	}
+    break;
+
+  case 51:
+#line 228 "toc_parse.y"
+    {
+		track_set_filename(track, yyvsp[-2].sval);
+		track_set_start(track, yyvsp[-1].ival);
+	}
+    break;
+
+  case 52:
+#line 232 "toc_parse.y"
+    {
+		track_set_filename(track, yyvsp[-2].sval);
+		track_set_start(track, yyvsp[-1].ival);
+	}
+    break;
+
+  case 56:
+#line 245 "toc_parse.y"
+    {
+		track_add_index(track, yyvsp[-1].ival);
+	}
+    break;
+
+  case 57:
+#line 248 "toc_parse.y"
+    {
+		track_set_zero_pre(track, yyvsp[-1].ival);
+		track_add_index(track, yyvsp[-1].ival);
+	}
+    break;
+
+  case 58:
+#line 255 "toc_parse.y"
+    { track_add_index(track, yyvsp[-1].ival); }
+    break;
+
+  case 62:
+#line 268 "toc_parse.y"
+    { /* not implemented */ }
+    break;
+
+  case 68:
+#line 286 "toc_parse.y"
+    {
+		cdtext_set (yyvsp[-2].ival, yyvsp[-1].sval, cdtext);
+	}
+    break;
+
+  case 69:
+#line 289 "toc_parse.y"
+    {
+		yyerror("binary CD-TEXT data not supported\n");
+	}
+    break;
+
+  case 86:
+#line 317 "toc_parse.y"
     { yyval.ival = time_msf_to_frame(yyvsp[-4].ival, yyvsp[-2].ival, yyvsp[0].ival); }
     break;
 
@@ -1286,7 +1396,7 @@ yyreduce:
     }
 
 /* Line 991 of yacc.c.  */
-#line 1289 "cue_parse.c"
+#line 1399 "toc_parse.c"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -1496,22 +1606,22 @@ yyreturn:
 }
 
 
-#line 98 "cue_parse.y"
+#line 102 "toc_parse.y"
 
 
 /* lexer interface */
-extern int cue_lineno;
+extern int toc_lineno;
 extern int yydebug;
-extern FILE *cue_yyin;
+extern FILE *toc_yyin;
 
 void yyerror (char *s)
 {
-	fprintf(stderr, "%d: %s\n", cue_lineno, s);
+	fprintf(stderr, "%d: %s\n", toc_lineno, s);
 }
 
-Cd *cue_parse (FILE *fp)
+Cd *toc_parse (FILE *fp)
 {
-	cue_yyin = fp;
+	toc_yyin = fp;
 	yydebug = 0;
 
 	if (0 == yyparse())

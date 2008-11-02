@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "cd.h"
+#include <cuetools/cd.h>
 
 typedef struct Data Data;
 struct Data {

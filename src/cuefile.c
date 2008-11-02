@@ -7,7 +7,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "cuefile.h"
+#include <cuetools/cuefile.h>
 #include "cue.h"
 #include "toc.h"
 
