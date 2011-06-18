@@ -40,6 +40,10 @@ enum PtiFormat {
 
 typedef struct Cdtext Cdtext;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* return a pointer to a new Cdtext */
 Cdtext *cdtext_init ();
 
@@ -67,5 +71,9 @@ const char *cdtext_get_key (int pti, int istrack);
  * in human readable format (for debugging)
  */
 void cdtext_dump (Cdtext *cdtext, int istrack);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

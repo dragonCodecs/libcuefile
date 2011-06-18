@@ -2065,8 +2065,16 @@ void *ptr;
 int main()
 	{
 	yylex();
+	cue_delete_buffer();
 	return 0;
 	}
 #endif
 #line 98 "cue_scan.l"
 
+void cue_delete_buffer()
+{
+	if (yy_current_buffer) {
+		yy_delete_buffer(yy_current_buffer);
+		yy_current_buffer = 0;
+	}
+}

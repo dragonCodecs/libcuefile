@@ -1180,12 +1180,12 @@ yyreduce:
 
   case 6:
 #line 115 "cue_parse.y"
-    { cd_set_catalog(cd, yyvsp[-1].sval); }
+    { cd_set_catalog(cd, yyvsp[-1].sval); free(yyvsp[-1].sval); }
     break;
 
   case 7:
 #line 116 "cue_parse.y"
-    { /* ignored */ }
+    { free(yyvsp[-1].sval); /* ignored */ }
     break;
 
   case 11:
@@ -1195,7 +1195,7 @@ yyreduce:
 			yyerror("too many files specified\n");
 			free(new_filename);
 		}
-		new_filename = strdup(yyvsp[-2].sval);
+		new_filename = yyvsp[-2].sval; /*strdup(yyvsp[-2].sval);*/
 	}
     break;
 
@@ -1208,15 +1208,19 @@ yyreduce:
 		track = cd_add_track(cd);
 		cdtext = track_get_cdtext(track);
 
-		cur_filename = new_filename;
-		if (NULL != cur_filename)
-			prev_filename = cur_filename;
+		if (cur_filename) free(cur_filename);
+		cur_filename = new_filename ? strdup(new_filename) : 0;
+		if (NULL != cur_filename) {
+			if (prev_filename) free(prev_filename);
+			prev_filename = strdup(cur_filename);
+		}
 
 		if (NULL == prev_filename)
 			yyerror("no file specified for track");
 		else
 			track_set_filename(track, prev_filename);
 
+		if (new_filename) free(new_filename);
 		new_filename = NULL;
 	}
     break;
@@ -1230,7 +1234,7 @@ yyreduce:
 
   case 34:
 #line 195 "cue_parse.y"
-    { track_set_isrc(track, yyvsp[-1].sval); }
+    { track_set_isrc(track, yyvsp[-1].sval); free(yyvsp[-1].sval); }
     break;
 
   case 35:
@@ -1274,7 +1278,7 @@ yyreduce:
 
   case 46:
 #line 235 "cue_parse.y"
-    { cdtext_set (yyvsp[-2].ival, yyvsp[-1].sval, cdtext); }
+    { cdtext_set (yyvsp[-2].ival, yyvsp[-1].sval, cdtext); free(yyvsp[-1].sval); }
     break;
 
   case 61:
@@ -1514,9 +1518,30 @@ Cd *cue_parse (FILE *fp)
 	cue_yyin = fp;
 	yydebug = 0;
 
-	if (0 == yyparse())
-		return cd;
+	int error = yyparse();
+	cue_delete_buffer();
+	if (prev_filename) {
+		free(prev_filename);
+		prev_filename = 0;
+	}
+	if (cur_filename) {
+		free(cur_filename);
+		cur_filename = 0;
+	}
+	if (new_filename) {
+		free(new_filename);
+		new_filename = 0;
+	}
 
-	return NULL;
+	Cd *res = cd;
+	if (error) {
+		cd_delete(cd);
+		res = 0;
+	}
+	cd = 0;
+	track = 0;
+	prev_track = 0;
+	cdtext = 0;
+	return res;
 }
 

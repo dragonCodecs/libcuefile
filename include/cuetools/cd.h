@@ -76,8 +76,14 @@ enum DataType {
 typedef struct Cd Cd;
 typedef struct Track Track;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* return pointer to CD structure */
 Cd *cd_init ();
+
+void cd_delete (Cd *cd);
 
 /* dump all info from CD structure
  * in human readable format (for debugging)
@@ -157,5 +163,9 @@ Cdtext *track_get_cdtext (Track *track);
 void track_add_index (Track *track, long index);
 int track_get_nindex (Track *track);
 long track_get_index (Track *track, int i);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
