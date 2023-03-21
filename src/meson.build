@@ -15,12 +15,11 @@ cuefileSrcs = [
 	'toc_scan.c',
 ]
 
-cuefile = library(
+cuefile = static_library(
 	'cuefile',
 	cuefileSrcs,
 	c_args: ['-DYY_NEVER_INTERACTIVE'],
 	include_directories: includes,
 	gnu_symbol_visibility: 'inlineshidden',
-	install: true,
-	version: meson.project_version()
+	install: true
 )
