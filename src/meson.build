@@ -1,7 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # SPDX-FileCopyrightText: 2023 Rachel Mant <git@dragonmux.network>
-c = meson.get_compiler('c')
-
 cuefileSrcs = [
 	'cd.c',
 	'cdtext.c',
