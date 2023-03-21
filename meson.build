@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: GPL-2.0-only
+# SPDX-License-Identifier: BSD-3-Clause
 # SPDX-FileCopyrightText: 2023 Rachel Mant <git@dragonmux.network>
 project(
 	'libcuefile',
