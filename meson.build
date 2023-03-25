@@ -5,12 +5,20 @@ project(
 	'c',
 	version: '0.0.0',
 	meson_version: '>= 0.63',
+	default_options: [
+		'c_std=gnu99',
+	]
 )
 
 c = meson.get_compiler('c')
-if c.get_id() == 'msvc'
+if target_machine.system() == 'windows'
 	add_project_arguments('-D_CRT_SECURE_NO_WARNINGS', language: 'c')
 endif
+
+add_project_arguments(
+	c.get_supported_arguments('-Wno-error=implicit-function-declaration'),
+	language: 'c'
+)
 
 subdir('include')
 subdir('src')
