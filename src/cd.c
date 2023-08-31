@@ -75,7 +75,7 @@ void track_delete(Track *track)
 
 void cd_delete (Cd *cd)
 {
-	size_t i;
+	int i;
 	if (cd->cdtext)
 		cdtext_delete(cd->cdtext);
 	if (cd->catalog)
